@@ -12,8 +12,8 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                echo 'Building Backend Image...'
-                sh "docker build -t ${env.DOCKER_USER}/${env.IMAGE_NAME}:${env.IMAGE_TAG} ."
+                echo "Building Image for Build #${env.BUILD_NUMBER}..."
+                sh "docker build -t ${env.DOCKER_USER}/${env.IMAGE_NAME}:${env.BUILD_NUMBER} ."
             }
         }
         stage('Test Health') {
