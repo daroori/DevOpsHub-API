@@ -3,7 +3,6 @@ pipeline {
     environment {
         DOCKER_USER = 'daroori'
         IMAGE_NAME = 'devopshub-api'
-        IMAGE_TAG = "${env.BUILD_NUMBER}"
     }
     stages {
         stage('Checkout') {
@@ -21,16 +20,16 @@ pipeline {
             steps {
                 echo 'Verifying Container...'
                 // Run a quick temporary container to check python version
-                sh "docker run --rm ${env.DOCKER_USER}/${env.IMAGE_NAME}:${env.TAG} python --version"
+                sh "docker run --rm ${env.DOCKER_USER}/${env.IMAGE_NAME}:${env.BUILD_NUMBER} python --version"
             }
             }
         stage('Push Docker Image') {
             steps {
-                echo "Pushing Image ${env.DOCKER_USER}/${env.IMAGE_NAME}:${env.TAG} to Docker Hub..."
+                echo "Pushing Image ${env.DOCKER_USER}/${env.IMAGE_NAME}:${env.BUILD_NUMBER} to Docker Hub..."
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
                     sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
-                    sh "docker push ${env.DOCKER_USER}/${env.IMAGE_NAME}:${env.TAG}"
-                    sh "docker tag ${env.DOCKER_USER}/${env.IMAGE_NAME}:${env.TAG} ${env.DOCKER_USER}/${env.IMAGE_NAME}:latest"
+                    sh "docker push ${env.DOCKER_USER}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    sh "docker tag ${env.DOCKER_USER}/${env.IMAGE_NAME}:${env.BUILD_NUMBER} ${env.DOCKER_USER}/${env.IMAGE_NAME}:latest"
                     sh "docker push ${env.DOCKER_USER}/${env.IMAGE_NAME}:latest"
                     sh "docker logout"
                 }
@@ -41,7 +40,7 @@ pipeline {
                 echo 'Deploying to K3s Cluster...'
                // This command updates the existing K8s deployment with the new image tag.
                 // We will fix the 'kubectl' setup in the next step.
-                sh "kubectl set image deployment/devopshub-api devopshub-api=${env.DOCKER_USER}/${env.IMAGE_NAME}:${env.TAG} -n default"
+                sh "kubectl set image deployment/devopshub-api devopshub-api=${env.DOCKER_USER}/${env.IMAGE_NAME}:${env.BUILD_NUMBER} -n default"
             }
         }
     }
