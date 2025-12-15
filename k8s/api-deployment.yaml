@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devopshub-api
+  labels:
+    app: devopshub-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: devopshub-api
+  template:
+    metadata:
+      labels:
+        app: devopshub-api
+    spec:
+      containers:
+      - name: devopshub-api
+        # Initial image will be overwritten by Jenkins in the pipeline
+        image: daroori/devopshub-api:latest
+        ports:
+        - containerPort: 8000 # Assuming your Python API runs on port 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: devopshub-api-service
+spec:
+  selector:
+    app: devopshub-api
+  ports:
+    - protocol: TCP
+      port: 80     # The port the service exposes (e.g., http://<cluster-ip>:80)
+      targetPort: 8000 # The port the container is listening on (containerPort)
+  type: LoadBalancer # K3s LoadBalancer will expose it on your host network
