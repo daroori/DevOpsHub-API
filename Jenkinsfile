@@ -38,6 +38,9 @@ pipeline {
         stage('Deploy top Kubernetes') {
             steps {
                 echo 'Deploying to K3s Cluster...'
+
+                // 1. Applying the manifest first (Creates the Deployment if it doesn't exist)
+                sh "/usr/local/bin/kubectl --kubeconfig /var/jenkins_home/.kube/config apply -f k8s/api-deployment.yaml"
                // This command updates the existing K8s deployment with the new image tag.
                 sh "/usr/local/bin/kubectl --kubeconfig /var/jenkins_home/.kube/config set image deployment/devopshub-api devopshub-api=${env.DOCKER_USER}/${env.IMAGE_NAME}:${env.BUILD_NUMBER} -n default"
             }
