@@ -27,7 +27,7 @@ pipeline {
             steps {
                 echo "Pushing Image ${env.DOCKER_USER}/${env.IMAGE_NAME}:${env.BUILD_NUMBER} to Docker Hub..."
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                    sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
+                    sh 'echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin'
                     sh "docker push ${env.DOCKER_USER}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}"
                     sh "docker tag ${env.DOCKER_USER}/${env.IMAGE_NAME}:${env.BUILD_NUMBER} ${env.DOCKER_USER}/${env.IMAGE_NAME}:latest"
                     sh "docker push ${env.DOCKER_USER}/${env.IMAGE_NAME}:latest"
@@ -39,8 +39,7 @@ pipeline {
             steps {
                 echo 'Deploying to K3s Cluster...'
                // This command updates the existing K8s deployment with the new image tag.
-                // We will fix the 'kubectl' setup in the next step.
-                sh "kubectl set image deployment/devopshub-api devopshub-api=${env.DOCKER_USER}/${env.IMAGE_NAME}:${env.BUILD_NUMBER} -n default"
+                sh "/snap/bin/kubectl set image deployment/devopshub-api devopshub-api=${env.DOCKER_USER}/${env.IMAGE_NAME}:${env.BUILD_NUMBER} -n default"
             }
         }
     }
